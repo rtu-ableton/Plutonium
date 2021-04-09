@@ -24,26 +24,25 @@ const ctx = canvas.getContext("2d")
 
 class Dot {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.X = x;
+    this.Y = y;
 	this.held = false;
 	this.hovered = false;
   }
 }
 
+var selectedDot = -1;
 var dotSize = 6
 
-var dotHeld = false
-var dotHovered = false
+var dot = new Dot(0,0);
 
-var dotX = 80
-var dotY = 40
+let dots = [];
 
 function ondrag(e){
-	dotX = e.layerX
-	dotY = e.layerY
+	dot.X = e.layerX
+	dot.Y = e.layerY
 	// 🐸 We send the value back to Julia 🐸 //
-	canvas.value = [dotX, dotY]
+	canvas.value = [dot.X, dot.Y]
 	canvas.dispatchEvent(new CustomEvent("input"))
 
 	drawDotLines();
@@ -58,7 +57,7 @@ function drawDotLines(){
 	ctx.beginPath();
 	ctx.lineWidth = "2";
 	ctx.strokeStyle = "green"; // Green path
-	ctx.moveTo(dotX, dotY);
+	ctx.moveTo(dot.X, dot.Y);
 	ctx.lineTo(200, 200);
 	ctx.stroke(); // Draw it
 
@@ -66,22 +65,22 @@ function drawDotLines(){
 	ctx.lineWidth = "2";
 	ctx.strokeStyle = "green"; // Green path
 	ctx.moveTo(0, 0);
-	ctx.lineTo(dotX, dotY);
+	ctx.lineTo(dot.X, dot.Y);
 	ctx.stroke(); // Draw it
 
-	ctx.fillStyle = dotHovered ? "white" : "red"
-	ctx.fillRect(dotX - dotSize/2, dotY - dotSize/2, dotSize, dotSize)
+	ctx.fillStyle = dot.hovered ? "white" : "red"
+	ctx.fillRect(dot.X - dotSize/2, dot.Y - dotSize/2, dotSize, dotSize)
 }
 
 function detectHover(e){
 
-	if (e.layerX > dotX - dotSize 
-		&& e.layerY > dotY - dotSize
-		&& e.layerX < dotX + dotSize 
-		&& e.layerY < dotY + dotSize){
-		dotHovered = true;
+	if (e.layerX > dot.X - dotSize 
+		&& e.layerY > dot.Y - dotSize
+		&& e.layerX < dot.X + dotSize 
+		&& e.layerY < dot.Y + dotSize){
+		dot.hovered = true;
 	} else {
-		dotHovered = false;
+		dot.hovered = false;
 	}
 	drawDotLines();
 
@@ -92,9 +91,9 @@ function newDot(e){
 }
 
 canvas.onmousedown = e => {
-	if (dotHovered)
+	if (dot.hovered)
 	{
-		dotHeld = true;
+		dot.held = true;
 		drawDotLines();
 	}
 	else
@@ -104,12 +103,12 @@ canvas.onmousedown = e => {
 }
 
 canvas.onmouseup = e => {
-	dotHeld = false;
+	dot.held = false;
 	drawDotLines();
 }
 
 canvas.onmousemove = e => {
-	if (dotHeld)
+	if (dot.held)
 	{
 		ondrag(e)
 	}
