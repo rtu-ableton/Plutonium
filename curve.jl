@@ -55,12 +55,17 @@ function selectedDot(){
 function ondrag(e, dot){
 	dot.X = e.layerX
 	dot.Y = e.layerY
-	// 🐸 We send the value back to Julia 🐸 //
-	canvas.value = [dot.X, 200 - dot.Y]
-	canvas.dispatchEvent(new CustomEvent("input"))
 
 	redraw();
+}
 
+function coordArray(){
+	var array = [];
+	dots.forEach(function(dot) {
+		array.push(dot.X);
+		array.push(200 - dot.Y);
+	});
+	return array;
 }
 
 function redraw(){
@@ -77,6 +82,10 @@ function redraw(){
     	drawDot(dot, prevDot);
 		prevDot = dot;
 	});
+
+	// 🐸 We send the value back to Julia 🐸 //
+	canvas.value = coordArray();
+	canvas.dispatchEvent(new CustomEvent("input"))
 }
 
 function drawDot(dot, prevDot){
@@ -161,17 +170,20 @@ redraw();
 """
 
 # ╔═╡ 47478d29-ff99-4b97-a809-59fee152c5e3
-dims[1], dims[2]
+begin
+	x = dims[1:2:end]
+	y = dims[2:2:end]
+end
 
 # ╔═╡ 05914563-59d5-4234-8f2d-dd9fedfdae8b
-scatter([dims[1]],[dims[2]], xlims=[0,200], ylims=[0,200] )
+scatter(x, y, xlims=[0,200], ylims=[0,200] )
 
 # ╔═╡ 1254b194-9382-4cec-9ddc-c9e5c232e24c
 
 
 # ╔═╡ Cell order:
 # ╟─35141100-2ca4-476a-b5f3-d364bcab31e6
-# ╠═05abd698-994a-11eb-3ea6-95ae4c538c0d
+# ╟─05abd698-994a-11eb-3ea6-95ae4c538c0d
 # ╠═47478d29-ff99-4b97-a809-59fee152c5e3
 # ╠═05914563-59d5-4234-8f2d-dd9fedfdae8b
 # ╠═1254b194-9382-4cec-9ddc-c9e5c232e24c
