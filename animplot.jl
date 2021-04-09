@@ -25,9 +25,6 @@ begin
 	gr()
 end;
 
-# ╔═╡ bb483009-13e7-4a4a-bee1-d66e20537035
-
-
 # ╔═╡ 8ad7ccd0-d359-11ea-1b9b-cbd441322c19
 begin
 	ticks_per_sec =20
@@ -66,7 +63,6 @@ end;
 # ╠═286828a8-fb5c-4538-b0ad-d38c558623e0
 # ╠═66fb87f2-d356-11ea-2f32-9369eb3e12c7
 # ╠═6f7e7c70-d356-11ea-1570-61e70b58a488
-# ╠═bb483009-13e7-4a4a-bee1-d66e20537035
-# ╟─b0e502d0-d359-11ea-0fd7-a74a05706fdb
+# ╠═b0e502d0-d359-11ea-0fd7-a74a05706fdb
 # ╠═8ad7ccd0-d359-11ea-1b9b-cbd441322c19
 # ╠═f4134320-d357-11ea-2871-05a13a891da2
