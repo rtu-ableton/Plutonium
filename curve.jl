@@ -41,22 +41,36 @@ class Dot {
 var selectedDot = -1;
 var dotSize = 6
 
-var dot = new Dot(0,0);
+var dotG = new Dot(123,0);
 
 let dots = [];
 
+dots.push(dotG);
+
+console.log(dots[0].X)
+
+function selectedDot(){
+	return dots[selectedDot];
+}
+
 function ondrag(e){
-	dot.X = e.layerX
-	dot.Y = e.layerY
+	dots[0].X = e.layerX
+	dots[0].Y = e.layerY
 	// 🐸 We send the value back to Julia 🐸 //
-	canvas.value = [dot.X, 200 - dot.Y]
+	canvas.value = [dots[0].X, 200 - dots[0].Y]
 	canvas.dispatchEvent(new CustomEvent("input"))
 
-	drawDotLines();
+	redraw();
 
 }
 
-function drawDotLines(){
+function redraw(){
+	dots.forEach(function(dot) {
+    	drawDot(dot);
+	});
+}
+
+function drawDot(dot){
 	// BG
 	ctx.fillStyle = '#ffecec'
 	ctx.fillRect(0, 0, 200, 200)
@@ -80,7 +94,7 @@ function drawDotLines(){
 }
 
 function detectHover(e){
-
+	var dot = dots[0];
 	if (e.layerX > dot.X - dotSize 
 		&& e.layerY > dot.Y - dotSize
 		&& e.layerX < dot.X + dotSize 
@@ -89,37 +103,42 @@ function detectHover(e){
 	} else {
 		dot.hovered = false;
 	}
-	drawDotLines();
+	redraw();
 
 }
 
 function newDot(e){
-
+	dots.push(Dot(e.layerX, e.layerY));
 }
 
 canvas.onmousedown = e => {
+	console.log(dots[0]);
+	var dot = dots[0];
 	if (dot.hovered)
 	{
 		dot.held = true;
-		drawDotLines();
 	}
 	else
 	{
 		newDot(e);
 	}
+	redraw();
 }
 
 canvas.onmouseup = e => {
+	var dot = dots[0];
 	dot.held = false;
-	drawDotLines();
+	redraw();
 }
 
 canvas.onmousemove = e => {
+	var dot = dots[0];
 	if (dot.held)
 	{
 		ondrag(e)
 	}
 	detectHover(e);
+	redraw();
 }
 
 // Fire a fake mousemoveevent to show something
@@ -138,8 +157,8 @@ scatter([dims[1]],[dims[2]], xlims=[0,200], ylims=[0,200] )
 
 
 # ╔═╡ Cell order:
-# ╠═35141100-2ca4-476a-b5f3-d364bcab31e6
-# ╟─05abd698-994a-11eb-3ea6-95ae4c538c0d
+# ╟─35141100-2ca4-476a-b5f3-d364bcab31e6
+# ╠═05abd698-994a-11eb-3ea6-95ae4c538c0d
 # ╠═47478d29-ff99-4b97-a809-59fee152c5e3
 # ╠═05914563-59d5-4234-8f2d-dd9fedfdae8b
 # ╠═1254b194-9382-4cec-9ddc-c9e5c232e24c
