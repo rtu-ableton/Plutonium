@@ -19,6 +19,24 @@ begin
 	gr()
 end
 
+# ╔═╡ 5c81abc2-736a-4402-b3b4-c12f5159a436
+using HypertextLiteral
+
+
+# ╔═╡ d6d9d120-fe82-4621-8cfd-fee2717f6ee3
+using JSON
+
+# ╔═╡ e68cb237-332e-4138-a343-eb450ef629cb
+
+
+# ╔═╡ b963434c-809f-4ab9-8238-7aabce6213ec
+cat="sooty"
+
+# ╔═╡ 70784d65-746a-47b4-a98d-8b3359f0d8ce
+@htl("""
+	<H5>Hello $(cat)!</H5>
+	""")
+
 # ╔═╡ 05abd698-994a-11eb-3ea6-95ae4c538c0d
 
 @bind dims html"""
@@ -38,19 +56,14 @@ class Dot {
   }
 }
 
-var selectedDot = -1;
 var dotSize = 6
 
-
-var dotInital = new Dot(0,0);
-var dotFinal = new Dot(200,200);
+var dotInitial = new Dot(0,200);
+var dotFinal = new Dot(200,0);
 
 let dots = [];
-
-
-function selectedDot(){
-	return dots[selectedDot];
-}
+dots.push(dotInitial);
+dots.push(dotFinal);
 
 function ondrag(e, dot){
 	dot.X = e.layerX
@@ -77,7 +90,7 @@ function redraw(){
 		return dot1.X < dot2.X ? -1 : dot1.X == dot2.X ? 1 : 0;
 	});
 
-	var prevDot = dotInital;
+	var prevDot = dots[0];
 	dots.forEach(function(dot) {
     	drawDot(dot, prevDot);
 		prevDot = dot;
@@ -171,19 +184,52 @@ redraw();
 
 # ╔═╡ 47478d29-ff99-4b97-a809-59fee152c5e3
 begin
-	x = dims[1:2:end]
-	y = dims[2:2:end]
+	x = float(dims[1:2:end])
+	y = float(dims[2:2:end])
+	
+	function lerp1(p1, p2, α::Float64)
+		return (1.0 - α) * p1 + α * p2
+	end
+
+	function lerpMulti(points, t)
+		numLevels = length(points)
+		# replace points in p as iteration proceeds
+		p = copy(points)
+		for level in numLevels-1:-1:1
+			for n=1:level
+				r = lerp1(p[n], p[n + 1], t);
+				p[n] = r;
+			end
+		end
+		p[1];
+	end
+
+	function bezier(pointsX, pointsY, t)
+		x = [lerpMulti(pointsX, τ) for τ in t]   
+		y = [lerpMulti(pointsY, τ) for τ in t]   
+		x,y
+	end
+
 end
 
 # ╔═╡ 05914563-59d5-4234-8f2d-dd9fedfdae8b
-scatter(x, y, xlims=[0,200], ylims=[0,200] )
+begin
+	scatter(x, y, xlims=[0,200], ylims=[0,200] )
+	xb, xy = bezier(x, y, 0:0.01:1)
+	plot!(xb, xy)
+end
 
 # ╔═╡ 1254b194-9382-4cec-9ddc-c9e5c232e24c
 
 
 # ╔═╡ Cell order:
 # ╟─35141100-2ca4-476a-b5f3-d364bcab31e6
+# ╠═5c81abc2-736a-4402-b3b4-c12f5159a436
+# ╠═e68cb237-332e-4138-a343-eb450ef629cb
+# ╠═d6d9d120-fe82-4621-8cfd-fee2717f6ee3
+# ╠═b963434c-809f-4ab9-8238-7aabce6213ec
+# ╠═70784d65-746a-47b4-a98d-8b3359f0d8ce
 # ╟─05abd698-994a-11eb-3ea6-95ae4c538c0d
-# ╠═47478d29-ff99-4b97-a809-59fee152c5e3
+# ╟─47478d29-ff99-4b97-a809-59fee152c5e3
 # ╠═05914563-59d5-4234-8f2d-dd9fedfdae8b
 # ╠═1254b194-9382-4cec-9ddc-c9e5c232e24c
