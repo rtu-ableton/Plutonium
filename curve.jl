@@ -13,7 +13,14 @@ macro bind(def, element)
     end
 end
 
+# ╔═╡ 35141100-2ca4-476a-b5f3-d364bcab31e6
+begin
+	using Plots
+	gr()
+end
+
 # ╔═╡ 05abd698-994a-11eb-3ea6-95ae4c538c0d
+
 @bind dims html"""
 <canvas width="200" height="200" style="position: relative"></canvas>
 
@@ -24,8 +31,8 @@ const ctx = canvas.getContext("2d")
 
 class Dot {
   constructor(x, y) {
-    this.X = x;
-    this.Y = y;
+	this.X = x;
+	this.Y = y;
 	this.held = false;
 	this.hovered = false;
   }
@@ -42,7 +49,7 @@ function ondrag(e){
 	dot.X = e.layerX
 	dot.Y = e.layerY
 	// 🐸 We send the value back to Julia 🐸 //
-	canvas.value = [dot.X, dot.Y]
+	canvas.value = [dot.X, 200 - dot.Y]
 	canvas.dispatchEvent(new CustomEvent("input"))
 
 	drawDotLines();
@@ -87,7 +94,7 @@ function detectHover(e){
 }
 
 function newDot(e){
-	
+
 }
 
 canvas.onmousedown = e => {
@@ -121,45 +128,18 @@ ondrag({layerX: 130, layerY: 160})
 </script>
 """
 
-# ╔═╡ f861c6c4-a6bc-47a1-ad7f-ae2538582316
+# ╔═╡ 47478d29-ff99-4b97-a809-59fee152c5e3
+dims[1], dims[2]
 
+# ╔═╡ 05914563-59d5-4234-8f2d-dd9fedfdae8b
+scatter([dims[1]],[dims[2]], xlims=[0,200], ylims=[0,200] )
 
-# ╔═╡ e318282a-2ff9-4174-868f-7a668862181f
-
-
-# ╔═╡ 502139d5-9218-448e-9b0e-5e193e1a8886
-
-
-# ╔═╡ 3722053a-45f7-463f-a454-852adcd5249b
-
-
-# ╔═╡ 4082b4e1-e7e0-4a65-808b-7d60d8356b44
-
-
-# ╔═╡ f50dc0c7-32a2-46ba-b8ac-2ed94579b44f
-
-
-# ╔═╡ 6f8a6b24-32da-44dd-9a1e-898bc34b99fe
-
-
-# ╔═╡ b22fddb2-d606-4906-82ff-7877dbeeb956
-
-
-# ╔═╡ 14a3fb2e-994a-11eb-2e0b-17202758cd52
-
-
-# ╔═╡ 0fcdc636-994a-11eb-1350-3fb2ab0fa767
+# ╔═╡ 1254b194-9382-4cec-9ddc-c9e5c232e24c
 
 
 # ╔═╡ Cell order:
-# ╠═05abd698-994a-11eb-3ea6-95ae4c538c0d
-# ╠═f861c6c4-a6bc-47a1-ad7f-ae2538582316
-# ╠═e318282a-2ff9-4174-868f-7a668862181f
-# ╠═502139d5-9218-448e-9b0e-5e193e1a8886
-# ╠═3722053a-45f7-463f-a454-852adcd5249b
-# ╠═4082b4e1-e7e0-4a65-808b-7d60d8356b44
-# ╠═f50dc0c7-32a2-46ba-b8ac-2ed94579b44f
-# ╠═6f8a6b24-32da-44dd-9a1e-898bc34b99fe
-# ╠═b22fddb2-d606-4906-82ff-7877dbeeb956
-# ╠═14a3fb2e-994a-11eb-2e0b-17202758cd52
-# ╠═0fcdc636-994a-11eb-1350-3fb2ab0fa767
+# ╠═35141100-2ca4-476a-b5f3-d364bcab31e6
+# ╟─05abd698-994a-11eb-3ea6-95ae4c538c0d
+# ╠═47478d29-ff99-4b97-a809-59fee152c5e3
+# ╠═05914563-59d5-4234-8f2d-dd9fedfdae8b
+# ╠═1254b194-9382-4cec-9ddc-c9e5c232e24c
