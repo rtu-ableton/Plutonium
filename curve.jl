@@ -41,21 +41,22 @@ class Dot {
 var selectedDot = -1;
 var dotSize = 6
 
-var dotInital = new Dot(123,0);
+
+var dotInital = new Dot(0,0);
+var dotFinal = new Dot(200,200);
 
 let dots = [];
 
-dots.push(dotInital);
 
 function selectedDot(){
 	return dots[selectedDot];
 }
 
-function ondrag(e){
-	dots[0].X = e.layerX
-	dots[0].Y = e.layerY
+function ondrag(e, dot){
+	dot.X = e.layerX
+	dot.Y = e.layerY
 	// 🐸 We send the value back to Julia 🐸 //
-	canvas.value = [dots[0].X, 200 - dots[0].Y]
+	canvas.value = [dot.X, 200 - dot.Y]
 	canvas.dispatchEvent(new CustomEvent("input"))
 
 	redraw();
@@ -63,32 +64,38 @@ function ondrag(e){
 }
 
 function redraw(){
-	dots.forEach(function(dot) {
-    	drawDot(dot);
-	});
-}
-
-function drawDot(dot){
 	// BG
 	ctx.fillStyle = '#ffecec'
 	ctx.fillRect(0, 0, 200, 200)
 
-	ctx.beginPath();
-	ctx.lineWidth = "2";
-	ctx.strokeStyle = "green"; // Green path
-	ctx.moveTo(dot.X, dot.Y);
-	ctx.lineTo(200, 200);
-	ctx.stroke(); // Draw it
+	dots.sort(function(dot1, dot2) {
+		return dot1.X > dot2.X;
+	});
+
+	var prevDot = dotInital;
+	dots.forEach(function(dot) {
+    	drawDot(dot, prevDot);
+		prevDot = dot;
+	});
+}
+
+function drawDot(dot, prevDot){
 
 	ctx.beginPath();
 	ctx.lineWidth = "2";
 	ctx.strokeStyle = "green"; // Green path
-	ctx.moveTo(0, 0);
+	ctx.moveTo(prevDot.X, prevDot.Y);
 	ctx.lineTo(dot.X, dot.Y);
 	ctx.stroke(); // Draw it
 
 	ctx.fillStyle = dot.hovered ? "white" : "red"
 	ctx.fillRect(dot.X - dotSize/2, dot.Y - dotSize/2, dotSize, dotSize)
+}
+
+function releaseAllDots(){
+	dots.forEach(function(dot) {
+		dot.held = false;
+	});
 }
 
 function detectHover(e){
@@ -111,6 +118,8 @@ function newDot(e){
 	console.log("Num Dots: " + dots.length)
 }
 
+
+
 canvas.onmousedown = e => {
 	var dotWasGrabbed = false;
 	dots.forEach(function(dot) {
@@ -122,6 +131,7 @@ canvas.onmousedown = e => {
 	});
 	if (!dotWasGrabbed)
 	{
+		releaseAllDots();
 		newDot(e);
 	}
 	redraw();
@@ -135,18 +145,18 @@ canvas.onmouseup = e => {
 }
 
 canvas.onmousemove = e => {
+
 	dots.forEach(function(dot) {
 		if (dot.held)
 		{
-			ondrag(e)
+			ondrag(e, dot)
 		}
 	});
 	detectHover(e);
 	redraw();
 }
 
-// Fire a fake mousemoveevent to show something
-ondrag({layerX: 130, layerY: 160})
+redraw();
 
 </script>
 """
