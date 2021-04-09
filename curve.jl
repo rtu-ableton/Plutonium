@@ -69,7 +69,7 @@ function redraw(){
 	ctx.fillRect(0, 0, 200, 200)
 
 	dots.sort(function(dot1, dot2) {
-		return dot1.X > dot2.X;
+		return dot1.X < dot2.X ? -1 : dot1.X == dot2.X ? 1 : 0;
 	});
 
 	var prevDot = dotInital;
@@ -115,7 +115,6 @@ function detectHover(e){
 
 function newDot(e){
 	dots.push(new Dot(e.layerX, e.layerY));
-	console.log("Num Dots: " + dots.length)
 }
 
 
@@ -123,7 +122,7 @@ function newDot(e){
 canvas.onmousedown = e => {
 	var dotWasGrabbed = false;
 	dots.forEach(function(dot) {
-		if (dot.hovered)
+		if (dot.hovered && !dotWasGrabbed)
 		{
 			dot.held = true;
 			dotWasGrabbed = true;
