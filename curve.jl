@@ -41,13 +41,11 @@ class Dot {
 var selectedDot = -1;
 var dotSize = 6
 
-var dotG = new Dot(123,0);
+var dotInital = new Dot(123,0);
 
 let dots = [];
 
-dots.push(dotG);
-
-console.log(dots[0].X)
+dots.push(dotInital);
 
 function selectedDot(){
 	return dots[selectedDot];
@@ -94,31 +92,35 @@ function drawDot(dot){
 }
 
 function detectHover(e){
-	var dot = dots[0];
-	if (e.layerX > dot.X - dotSize 
-		&& e.layerY > dot.Y - dotSize
-		&& e.layerX < dot.X + dotSize 
-		&& e.layerY < dot.Y + dotSize){
-		dot.hovered = true;
-	} else {
-		dot.hovered = false;
-	}
+	dots.forEach(function(dot) {
+		if (e.layerX > dot.X - dotSize 
+			&& e.layerY > dot.Y - dotSize
+			&& e.layerX < dot.X + dotSize 
+			&& e.layerY < dot.Y + dotSize){
+			dot.hovered = true;
+		} else {
+			dot.hovered = false;
+		}
+	});
 	redraw();
 
 }
 
 function newDot(e){
-	dots.push(Dot(e.layerX, e.layerY));
+	dots.push(new Dot(e.layerX, e.layerY));
+	console.log("Num Dots: " + dots.length)
 }
 
 canvas.onmousedown = e => {
-	console.log(dots[0]);
-	var dot = dots[0];
-	if (dot.hovered)
-	{
-		dot.held = true;
-	}
-	else
+	var dotWasGrabbed = false;
+	dots.forEach(function(dot) {
+		if (dot.hovered)
+		{
+			dot.held = true;
+			dotWasGrabbed = true;
+		}
+	});
+	if (!dotWasGrabbed)
 	{
 		newDot(e);
 	}
@@ -126,17 +128,19 @@ canvas.onmousedown = e => {
 }
 
 canvas.onmouseup = e => {
-	var dot = dots[0];
-	dot.held = false;
+	dots.forEach(function(dot) {
+		dot.held = false;
+	});
 	redraw();
 }
 
 canvas.onmousemove = e => {
-	var dot = dots[0];
-	if (dot.held)
-	{
-		ondrag(e)
-	}
+	dots.forEach(function(dot) {
+		if (dot.held)
+		{
+			ondrag(e)
+		}
+	});
 	detectHover(e);
 	redraw();
 }
