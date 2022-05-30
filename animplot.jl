@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.1
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -7,8 +7,9 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
 end
@@ -24,6 +25,12 @@ begin
 	using PlutoUI, Plots, DataStructures
 	gr()
 end;
+
+# ╔═╡ eafc4bc6-dec3-4154-a2de-7030122054bf
+md"""
+This ntebook demos a scrolling plot of a random walk and displays the framerate.
+Seems to be about 20fps, which is OK.
+"""
 
 # ╔═╡ 8ad7ccd0-d359-11ea-1b9b-cbd441322c19
 begin
@@ -59,6 +66,7 @@ begin
 end;
 
 # ╔═╡ Cell order:
+# ╠═eafc4bc6-dec3-4154-a2de-7030122054bf
 # ╠═fb8785cd-565a-42d8-bffe-83f9f9b9a2b6
 # ╠═286828a8-fb5c-4538-b0ad-d38c558623e0
 # ╠═66fb87f2-d356-11ea-2f32-9369eb3e12c7
