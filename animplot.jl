@@ -29,12 +29,12 @@ end;
 # ╔═╡ eafc4bc6-dec3-4154-a2de-7030122054bf
 md"""
 This ntebook demos a scrolling plot of a random walk and displays the framerate.
-Seems to be about 20fps, which is OK.
+Seems to easily be about 60fps, which is good.
 """
 
 # ╔═╡ 8ad7ccd0-d359-11ea-1b9b-cbd441322c19
 begin
-	ticks_per_sec =20
+	ticks_per_sec =60
 	ΔT = 1/ticks_per_sec
 	last_time = [0.0]
 	buffsize=500

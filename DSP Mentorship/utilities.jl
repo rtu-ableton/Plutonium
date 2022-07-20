@@ -1,12 +1,5 @@
 # utilities for plotting complex exponentials in 3D
 
-using Interact
-using FFTW
-using Plots
-using Images, Pkg
-using HTTP
-
-
 i = 1im;
 
 function myTinyFft(x)
@@ -148,6 +141,18 @@ end
 function plotSpectrumZeroCenter(x)
     x, y = posNegMagSpec(x)
     plot(x, y, framestyle=:origin, ylims=[0, 500])
+end
+
+# A zero padded magnitude spectrum
+function plotMagSpec(x)
+    xPadded = [x; zeros(length(x) * 3)]
+    magSpec = abs.(fft(flipHalves(xPadded)))
+    N = length(magSpec)
+    N_2 = div(N, 2)
+
+    x = 2 * π * [1:N_2] ./ N
+    y = magSpec[1:N_2]
+    plot!(x, y, framestyle=:origin)
 end
 
 function normalizePeak(x)
