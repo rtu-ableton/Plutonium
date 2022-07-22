@@ -253,3 +253,5 @@ function zTransformIIR(a::Array{Float64,1}, b::Array{Float64,1}, range=-2:0.05:2
 
     Plots.plot(plot1, plot2, size=[1400, 600])
 end
+
+"DSP utilities are loaded"
