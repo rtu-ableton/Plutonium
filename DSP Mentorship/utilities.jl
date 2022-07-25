@@ -254,4 +254,15 @@ function zTransformIIR(a::Array{Float64,1}, b::Array{Float64,1}, range=-2:0.05:2
     Plots.plot(plot1, plot2, size=[1400, 600])
 end
 
+function plotDbMagSpectrum(x; kwargs...)
+    xPadded = [x; zeros(length(x) * 3)]
+    magSpec = abs.(fft(flipHalves(xPadded)))
+    N = length(magSpec)
+    N_2 = div(N, 2)
+
+    x = 2 * π * [1:N_2] ./ N
+    y = log10.(magSpec[1:N_2])
+    plot(x, y, framestyle=:origin, ylims=[0, 2.5]; kwargs...)
+end
+
 "DSP utilities are loaded"
