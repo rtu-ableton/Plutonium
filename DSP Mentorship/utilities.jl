@@ -254,8 +254,34 @@ function zTransformIIR(a::Array{Float64,1}, b::Array{Float64,1}, range=-2:0.05:2
     Plots.plot(plot1, plot2, size=[1400, 600])
 end
 
+function delay(signal::Array, delayInSamples::Integer)
+    return [zeros(delayInSamples); signal[1:end-delayInSamples]]
+end
+
+function integrate(signal)
+    accum = 0.0
+    n = 1
+    out = similar(signal)
+    for s in signal
+        accum += s
+        out[n] = accum
+        n += 1
+    end
+    out
+end
+
+function delay(signal::Array, delayInSamples::Real)
+    return [zeros(delayInSamples); signal[1:end-delayInSamples]]
+end
+
+function hann(N)
+    n = 1:N
+    return (0.5 .- 0.5 .* cos.(2 .* π .* n ./ N))
+end
+
 function plotDbMagSpectrum(x; kwargs...)
-    xPadded = [x; zeros(length(x) * 3)]
+    windowed = x .* hann(length(x))
+    xPadded = [windowed; zeros(length(x) * 3)]
     magSpec = abs.(fft(flipHalves(xPadded)))
     N = length(magSpec)
     N_2 = div(N, 2)

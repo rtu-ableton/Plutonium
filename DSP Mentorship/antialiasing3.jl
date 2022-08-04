@@ -31,7 +31,8 @@ md"""
 
 # ╔═╡ 4c6fd2f5-2929-4df8-97fc-83ed9d8babba
 # The ideally band-limited impulse is a sinc function
-# We get this by actually calculating the IFFT for a rectangle
+# We get this by actually calculating the IFFT for a rectangle function
+# 
 function sinc(x)
 	if (x == 0)
 		return 1.0
@@ -43,12 +44,12 @@ end
 plot(sinc.(-20.0:0.01:20.0), title="Sinc function")
 
 # ╔═╡ ff247dd9-9120-415b-ab8d-71649f5f33a4
-# the idea impulse train is a sequence of these
-function sincTrain(N, P)
+# the ideal impulse train is a sequence of these
+function sincTrain(N, P, phase = 0.0)
 	x = zeros(N)
-	for l in 0:20
+	for l in -20:20
 		for n in 1:N
-			x[n] += sinc(n - l * P)
+			x[n] += sinc(n - l * P - phase * P)
 		end
 	end
 	x
@@ -58,13 +59,27 @@ end
 @bind period Slider(3:0.1:100)
 
 # ╔═╡ 74c221eb-40fd-4e3a-9ad5-e0c5cf602969
-plot(sincTrain(100, period), title="Sinc train",ylims=[-1,1])
+plot(sincTrain(100, period, 0.1), title="Sinc train",ylims=[-1,1])
 
 # ╔═╡ 1b773759-cea9-42aa-a131-d29d83c3a474
 plotDbMagSpectrum(sincTrain(4000, period))
 
-# ╔═╡ a72bf4aa-3668-4167-a374-42caec951817
+# ╔═╡ 8068b5ff-9da2-42e6-8540-2e33d4a8cbe0
+function squareWaveFromImpulse(N, period)
+	posImps = sincTrain(N, period, 0.5)
+	negImps = -sincTrain(N, period)
+	posNeg = posImps .+ negImps
+	integrate(posNeg) * 2 .- 1
+end
 
+# ╔═╡ 7d4bc03d-5d30-49d2-9cc0-6d521efc7723
+@bind periodSquare Slider(20.5:0.1:200)
+
+# ╔═╡ 44fe6f9e-a944-4695-99fe-91ccf6ddbd60
+plot(squareWaveFromImpulse(400, periodSquare), ylims=[-1.3, 1.3])
+
+# ╔═╡ fbb470bb-6999-4f3f-99cb-abac249d0304
+plotDbMagSpectrum(squareWaveFromImpulse(4000, periodSquare))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1078,6 +1093,9 @@ version = "0.9.1+5"
 # ╠═74c221eb-40fd-4e3a-9ad5-e0c5cf602969
 # ╠═ed8f8bd6-c351-4f37-b141-312aaa72ff3a
 # ╠═1b773759-cea9-42aa-a131-d29d83c3a474
-# ╠═a72bf4aa-3668-4167-a374-42caec951817
+# ╠═8068b5ff-9da2-42e6-8540-2e33d4a8cbe0
+# ╠═7d4bc03d-5d30-49d2-9cc0-6d521efc7723
+# ╠═44fe6f9e-a944-4695-99fe-91ccf6ddbd60
+# ╠═fbb470bb-6999-4f3f-99cb-abac249d0304
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

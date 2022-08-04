@@ -27,7 +27,7 @@ include("utilities.jl");
 
 # ╔═╡ 38157ab6-0e98-11ed-31ab-133d7ba0db0c
 md"""
-### Lagrange Interpolation
+### Interpolation (Sinc & lagrange)
 """
 
 # ╔═╡ ce7341a3-75ac-491d-849d-a18a51577349
@@ -39,32 +39,34 @@ Lagrange Interpolation is an answer to the question: how do we create a function
 """
 
 # ╔═╡ f392cecf-1448-49ee-b177-595f3b334f34
-function samplesSliders(sampleNames::Vector)
-	
-	return combine() do Child
+	function samplesSliders(sampleNames::Vector)
 		
-		inputs = [
-			md""" $(name): $(
-				Child(name, Slider(0:0.01:1))
-			)"""
+		return combine() do Child
 			
-			for name in sampleNames
-		]
-		
-		md"""
-		#### Samples
-		$(inputs)
-		"""
+			inputs = [
+				md""" $(name): $(
+					Child(name, Slider(0:0.01:1))
+				)"""
+				
+				for name in sampleNames
+			]
+			
+			md"""
+			#### Samples
+			$(inputs)
+			"""
+		end
 	end
-end
 
 # ╔═╡ 95c76337-2d6c-49d5-8dbc-c05306943f4c
+# the most basic interpolation is to just take the value of the previous sample
+# as the level of the signal
 function interpolateBasic(x, upsampleFactor)
 	N = length(x)
 	Nup = N * upsampleFactor - 1;
 	ys = zeros(Nup)
 	for m in 1:Nup
-		@show frac = m / upsampleFactor;
+		frac = m / upsampleFactor;
 		n = Int(floor(frac)) + 1
 		ys[m] = x[n]
 	end
@@ -123,9 +125,9 @@ end
 function convolve2(a, b)
     N = length(b)
     M = length(a)
-    result = zeros(N + M)
+    result = zeros(N * 2)
     for m = 1:M
-        for n = 1:N+div(N,2)
+        for n = 1:2*N
             shifted_b = (n - m) < 0 || (n - m) > N - 1 ? 0 : b[n-m+1]
             toSum = a[m] * shifted_b
             result[n] += toSum
@@ -138,9 +140,11 @@ end
 @bind samples samplesSliders(["x0", "x1", "x2", "x3"])
 
 # ╔═╡ 725b3663-fffb-487d-a3f3-102031f68dab
+
+
 begin
-	upsampleFactor = 16;
 	x = [samples.x0, samples.x1, samples.x2, samples.x3];
+	upsampleFactor = 16;
 	stemPlot(interpolateLinear(x, upsampleFactor))
 	scatter!(collect(0:(length(x)-1)) .* upsampleFactor, x)
 end
@@ -151,10 +155,34 @@ stemPlot(decimate(x, upsampleFactor))
 
 # ╔═╡ 4198ebd3-f6d0-4266-b265-4f1d24c8b897
 # we can intepolate by convolving the decimated signal with the triangle basis!
+
+begin
 stemPlot(convolve2(triangleBasis(upsampleFactor), decimate(x, upsampleFactor)))
+scatter!(collect(0:(length(x)-1)) .* upsampleFactor, x)
+end
 
 # ╔═╡ 09889203-a5e7-40db-81fc-d3c966b1a9a3
+# we can also create a sinc basis and use that as a filter
+function sincBasis(upsampleFactor, width)
+	len = upsampleFactor * width * 2 + 1
+	w = zeros(len)	
+	N = upsampleFactor * width
+	for n in -(N-1):N
+		w[n + N] += sinc(n/upsampleFactor)
+	end
+	w
+end
 
+
+
+
+# ╔═╡ c7cdfe12-c57f-47e3-9265-53f614f3307d
+stemPlot(sincBasis(8, 4))
+
+# ╔═╡ 206c0976-0b1a-42bb-befb-7346ab9cc6b7
+begin
+stemPlot(convolve2(sincBasis(upsampleFactor, 4), decimate(x, upsampleFactor)))
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1162,11 +1190,11 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═38157ab6-0e98-11ed-31ab-133d7ba0db0c
-# ╠═2f667db1-1e64-41eb-892a-60e6e2649c23
-# ╠═ce7341a3-75ac-491d-849d-a18a51577349
-# ╠═ab011d7f-df5b-42ad-96e8-bbe2927b1ba8
-# ╠═63c84929-d156-4567-bdab-8f0e614dcddb
-# ╠═f392cecf-1448-49ee-b177-595f3b334f34
+# ╟─2f667db1-1e64-41eb-892a-60e6e2649c23
+# ╟─ce7341a3-75ac-491d-849d-a18a51577349
+# ╟─ab011d7f-df5b-42ad-96e8-bbe2927b1ba8
+# ╟─63c84929-d156-4567-bdab-8f0e614dcddb
+# ╟─f392cecf-1448-49ee-b177-595f3b334f34
 # ╠═95c76337-2d6c-49d5-8dbc-c05306943f4c
 # ╠═46f31bf5-ddc7-4b43-8dad-bf6109c2db47
 # ╠═725b3663-fffb-487d-a3f3-102031f68dab
@@ -1176,7 +1204,9 @@ version = "0.9.1+5"
 # ╠═0d1896b1-bfcc-4668-aa30-6b4af030d2a0
 # ╠═74e14f65-d822-4f5a-b577-b415e9d37738
 # ╠═4198ebd3-f6d0-4266-b265-4f1d24c8b897
-# ╠═3fa50ba8-71af-4b4e-91bb-f10a5bd68166
 # ╠═09889203-a5e7-40db-81fc-d3c966b1a9a3
+# ╠═c7cdfe12-c57f-47e3-9265-53f614f3307d
+# ╠═206c0976-0b1a-42bb-befb-7346ab9cc6b7
+# ╠═3fa50ba8-71af-4b4e-91bb-f10a5bd68166
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

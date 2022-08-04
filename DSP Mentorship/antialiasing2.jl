@@ -11,7 +11,7 @@ begin
 	using PlutoUI
 end
 
-# ╔═╡ 79d9aad8-b805-11ec-012a-2951a59354e8
+# ╔═╡ efdcff57-15da-425a-9695-d9a6605cf688
 include("utilities.jl");
 
 # ╔═╡ 04c37537-e682-4538-8121-083115c10636
@@ -23,6 +23,15 @@ md"""
 md"""
 # Integrating impulses gives steps
 """
+
+# ╔═╡ 8ce99269-88db-4db2-91ad-d28b5bb5f04c
+# A very naive impulse train
+function impulses(N, period)
+	map(x->(Int(x - 1) % period == 0 ? 1.0 : 0.0), 1:N)
+end
+
+# ╔═╡ d1e06dc4-1cfb-48e0-96a0-dd51d02a4938
+plot(impulses(101, 25))
 
 # ╔═╡ 7f49e527-9b65-4ba7-84af-2267efb8970c
 # A discrete version of integration, just accumulates all sample values up to the given sample
@@ -38,15 +47,6 @@ function integrate(signal)
 	out
 end
 
-# ╔═╡ 8ce99269-88db-4db2-91ad-d28b5bb5f04c
-# A very naive impulse train
-function impulses(N, period)
-	map(x->(Int(x - 1) % period == 0 ? 1.0 : 0.0), 1:N)
-end
-
-# ╔═╡ d1e06dc4-1cfb-48e0-96a0-dd51d02a4938
-plot(impulses(101, 25))
-
 # ╔═╡ 1939061d-6b96-4050-80aa-5a5805a9d431
 plot(integrate(impulses(101, 25)))
 
@@ -61,35 +61,34 @@ end
 
 begin
 N = 1000
-period = 100
+period = 200
 
 # add positive and negative impulse train
-posimps = impulses(N, period*2);
-negImps = .-delay(posimps, period);
+posimps = impulses(N, period);
+negImps = -delay(posimps, div(period,2));
 	
 posNeg = posimps .+ negImps
 	
-plot(posNeg)
+plot(posNeg, linecolor="black")
 
-squareWave = integrate(posNeg) .- 0.5;
+squareWave = integrate(posNeg) * 2 .- 1;
 	
-plot!(squareWave)
+plot!(squareWave, linecolor="red")
 
-end
+triWave = integrate(squareWave) * 4 / period .- 1
 
-# ╔═╡ 1335d258-e320-41a4-bfe7-356d1173dc12
-begin
-	# we can make a triangle wave by integrating a square wave
-	triWave = integrate(squareWave)
-	
-	plot(triWave)
+plot!(triWave, linecolor="green")
 end
 
 # ╔═╡ bda1dbb5-0155-4ef4-b966-4cbccdf27877
 md"""
 Why is integrating waveforms useful? Because, since integration is a LTI filter, we know it does not add any new frequencies, and is itself bandlimited.
 
-This means if we can generate a band limited impulse train (BLIT), then we can easily derive saw, square, rectangle and triangle waveforms from it.
+This is useful in two ways:
+
+1: This means if we can generate a band limited impulse train (BLIT), then we can easily derive saw, square, rectangle and triangle waveforms from it.
+
+2: If we know a "closed form" formula for the impulse residual we can integrate it to get the residual for a step, and integrate it again to get the residual for a triangle.
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1097,15 +1096,14 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═04c37537-e682-4538-8121-083115c10636
 # ╠═8caefc51-e904-4da3-8718-1f8029f5c0bb
-# ╠═79d9aad8-b805-11ec-012a-2951a59354e8
+# ╠═efdcff57-15da-425a-9695-d9a6605cf688
 # ╟─488bc045-22a8-4ece-b3fd-207f9a6705bc
-# ╠═7f49e527-9b65-4ba7-84af-2267efb8970c
 # ╠═8ce99269-88db-4db2-91ad-d28b5bb5f04c
 # ╠═d1e06dc4-1cfb-48e0-96a0-dd51d02a4938
+# ╠═7f49e527-9b65-4ba7-84af-2267efb8970c
 # ╠═1939061d-6b96-4050-80aa-5a5805a9d431
 # ╠═785f9ddb-8b6e-4dc8-9364-c7cd116e00ea
 # ╠═8f66fcdd-f78e-4b98-a06a-3029bcdb2b4c
-# ╠═1335d258-e320-41a4-bfe7-356d1173dc12
-# ╠═bda1dbb5-0155-4ef4-b966-4cbccdf27877
+# ╟─bda1dbb5-0155-4ef4-b966-4cbccdf27877
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
