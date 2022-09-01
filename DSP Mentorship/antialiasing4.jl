@@ -4,6 +4,16 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ bfe9cfb4-6a04-43c3-8dea-d70c5b7ea63a
 begin
 	using Plots
@@ -19,7 +29,7 @@ include("InterpolationFunctions.jl");
 
 # ╔═╡ 53debc96-0c3e-11ed-2a53-6bd4fcd0e340
 md"""
-### Introduction to Anti-Aliasing Oscillator Waveforms 4: How Ableton Wavetable works
+### Introduction to Anti-Aliasing Oscillator Waveforms 4: How Ableton's Wavetable Oscillator works
 """
 
 # ╔═╡ 66ae142f-c917-4306-ab97-625fe71e2fc5
@@ -47,21 +57,100 @@ begin
 		x
 	end
 	
-	x = bandlimitedSaw(44100, 1, 44100)
+	hiResSaw = bandlimitedSaw(256, 44100/256, 44100)
 	
-	plot(x)
+	plot(hiResSaw)
 end
 
 # ╔═╡ 79c8d47b-86a6-490e-a0df-08d4e4cd2f64
+
+
 # a naive wt synth: just loop the wavetable but interpolate through samples to pitch up and down
-function badWavetableSynth(wt, freq, N)
+function badWavetableSynth(wt, freq, FS, N)
+	phase = 0.
+	out = zeros(N)
+	phaseInc = freq / FS
+	for n in 1:N
+		phase += phaseInc
+		if phase > 1.
+			phase -= 1.
+		end
+		pos = phase * length(wt)
+		i = floor(Int64, pos)
+		f = pos - i
+		# read the position in the wavetable by oversampling
+		out[n] = sincSample(CircularArray(wt), i, f)
+	end
+	out
 end
 
+# ╔═╡ f87ba0dc-b055-4aa5-ae21-1467824362e0
+@bind freqSaw Slider(40:400.1)
+
+# ╔═╡ 5c643d77-3e11-4522-8ea1-1cfd6698702f
+plotDbMagSpectrum(badWavetableSynth(hiResSaw, freqSaw, 44100., 4000))
+
 # ╔═╡ 83b0f3fc-dff8-4321-a43c-9f46b76dbded
-# one solution
+# one solution: MIPS
+# generate multiple wavetables
+function generateMips(wt, L, FS)
+	mips = []
+	for l in 1:L
+		m = filterFFT(wt, 1 / 2^l)
+		push!(mips, m);
+	end
+	mips
+end
+
+
+# ╔═╡ 2f73e800-52c5-448c-9858-7cc747bc97e0
+plot(generateMips(hiResSaw, 8, 44100))
+
+# ╔═╡ 36cd818f-22fa-4d36-b178-e2c3f0797e11
+
+
+# ╔═╡ e07dd2e7-7ee6-4116-94e5-6499c3dceadb
+
+function betterWavetableSynth(mips, freq, FS, N)
+	phase = 0.
+	out = zeros(N)
+	phaseInc = freq / FS
+
+	@show index = length(mips) - floor(Int64, log2(FS / freq))
+	wt = mips[index]
+
+	for n in 1:N
+		phase += phaseInc
+		if phase > 1.
+			phase -= 1.
+		end
+		pos = phase * length(wt)
+		i = floor(Int64, pos)
+		f = pos - i
+		out[n] = sincSample(wt, i, f)
+	end
+	out
+end
+
+# ╔═╡ 696cef4b-27d8-49a4-8e9f-9b01cbade4c2
+@bind freqMips Slider(200:10000.1)
 
 # ╔═╡ 1b773759-cea9-42aa-a131-d29d83c3a474
-plotDbMagSpectrum(sincTrain(4000, period))
+begin
+	mips = generateMips(hiResSaw, 8, 44100)
+	out = betterWavetableSynth(mips, freqMips, 44100., 4000)
+	plotDbMagSpectrum(out)
+end
+
+# ╔═╡ 96e001d6-be0f-4c7d-acc1-7e455d4bbeaa
+md"""
+But this is far from perfect because:
+- Half the spectrum keeps going missing (this is solved in Serum by oversampling we think)
+- If we do this for 256 wavetables we ned up with a big memory footprint, not bad in itself but accessing it randomly create huge cache misses
+
+If fact it turned out that generating a wavetable using IFFTs on the fly was faster than this approach for modern CPUs and usgin a heavily optimised FFT library. 
+"""
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1073,7 +1162,14 @@ version = "0.9.1+5"
 # ╟─66ae142f-c917-4306-ab97-625fe71e2fc5
 # ╠═095f924d-fca8-4852-8835-42c8d64373bd
 # ╠═79c8d47b-86a6-490e-a0df-08d4e4cd2f64
+# ╠═f87ba0dc-b055-4aa5-ae21-1467824362e0
+# ╠═5c643d77-3e11-4522-8ea1-1cfd6698702f
 # ╠═83b0f3fc-dff8-4321-a43c-9f46b76dbded
+# ╠═2f73e800-52c5-448c-9858-7cc747bc97e0
+# ╠═36cd818f-22fa-4d36-b178-e2c3f0797e11
+# ╠═e07dd2e7-7ee6-4116-94e5-6499c3dceadb
+# ╠═696cef4b-27d8-49a4-8e9f-9b01cbade4c2
 # ╠═1b773759-cea9-42aa-a131-d29d83c3a474
+# ╟─96e001d6-be0f-4c7d-acc1-7e455d4bbeaa
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
