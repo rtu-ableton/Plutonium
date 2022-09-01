@@ -291,4 +291,18 @@ function plotDbMagSpectrum(x; kwargs...)
     plot(x, y, framestyle=:origin, ylims=[0, 2.5]; kwargs...)
 end
 
+# Create a bandlimited saw that automatically stops sinusoids going over nyquist
+function bandlimitedSaw(N, f, FS)
+    x = zeros(N)
+    k = 1
+
+    while (k * f) < FS / 2.0
+        for n = 1:N
+            x[n] += -2 / (π * k) * (-1)^k * sin(2 * π * n * k * f / FS)
+        end
+        k += 1
+    end
+    x
+end
+
 "DSP utilities are loaded"
