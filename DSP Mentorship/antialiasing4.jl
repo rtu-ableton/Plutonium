@@ -14,13 +14,13 @@ end
 # ╔═╡ ca4c03db-25a9-4faf-92fb-d52375289827
 include("utilities.jl");
 
+# ╔═╡ 37dba575-7980-4aa8-ad50-ee4136f36adb
+include("InterpolationFunctions.jl");
+
 # ╔═╡ 53debc96-0c3e-11ed-2a53-6bd4fcd0e340
 md"""
 ### Introduction to Anti-Aliasing Oscillator Waveforms 4: How Ableton Wavetable works
 """
-
-# ╔═╡ 83b0f3fc-dff8-4321-a43c-9f46b76dbded
-
 
 # ╔═╡ 66ae142f-c917-4306-ab97-625fe71e2fc5
 md"""
@@ -32,10 +32,33 @@ In the previous session we saw how additive synthesis avoids aliasing by "sort o
 """
 
 # ╔═╡ 095f924d-fca8-4852-8835-42c8d64373bd
-
+begin
+	# a very high resolution sawtooth in the audio domain
+	function bandlimitedSaw(N, f, FS)
+		x = zeros(N)
+		k = 1
+		
+		while (k * f) < FS/2.0
+			for n=1:N
+				x[n] += -2/(π*k) * (-1)^k * sin(2 * π * n * k * f / FS)
+			end
+			k += 1
+		end
+		x
+	end
+	
+	x = bandlimitedSaw(44100, 1, 44100)
+	
+	plot(x)
+end
 
 # ╔═╡ 79c8d47b-86a6-490e-a0df-08d4e4cd2f64
+# a naive wt synth: just loop the wavetable but interpolate through samples to pitch up and down
+function badWavetableSynth(wt, freq, N)
+end
 
+# ╔═╡ 83b0f3fc-dff8-4321-a43c-9f46b76dbded
+# one solution
 
 # ╔═╡ 1b773759-cea9-42aa-a131-d29d83c3a474
 plotDbMagSpectrum(sincTrain(4000, period))
@@ -1045,7 +1068,8 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╟─53debc96-0c3e-11ed-2a53-6bd4fcd0e340
 # ╟─bfe9cfb4-6a04-43c3-8dea-d70c5b7ea63a
-# ╟─ca4c03db-25a9-4faf-92fb-d52375289827
+# ╠═ca4c03db-25a9-4faf-92fb-d52375289827
+# ╠═37dba575-7980-4aa8-ad50-ee4136f36adb
 # ╟─66ae142f-c917-4306-ab97-625fe71e2fc5
 # ╠═095f924d-fca8-4852-8835-42c8d64373bd
 # ╠═79c8d47b-86a6-490e-a0df-08d4e4cd2f64
